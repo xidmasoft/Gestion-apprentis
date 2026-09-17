@@ -54,7 +54,8 @@ function create($db) {
         try {
             $query = "INSERT INTO filieres SET nom=:nom, description=:description, actif=:actif";
             $stmt = $db->prepare($query);
-            $stmt->bindParam(":nom", strip_tags($data->nom));
+            $nom = strip_tags($data->nom);
+            $stmt->bindParam(":nom", $nom);
             $stmt->bindValue(":description", isset($data->description) ? strip_tags($data->description) : null);
             $stmt->bindValue(":actif", isset($data->actif) ? $data->actif : 1);
             if ($stmt->execute()) {
@@ -77,7 +78,8 @@ function update($db) {
         try {
             $query = "UPDATE filieres SET nom=:nom, description=:description, actif=:actif WHERE id=:id";
             $stmt = $db->prepare($query);
-            $stmt->bindParam(":nom", strip_tags($data->nom));
+            $nom = strip_tags($data->nom);
+            $stmt->bindParam(":nom", $nom);
             $stmt->bindValue(":description", isset($data->description) ? strip_tags($data->description) : null);
             $stmt->bindValue(":actif", isset($data->actif) ? $data->actif : 1);
             $id = strip_tags($data->id);

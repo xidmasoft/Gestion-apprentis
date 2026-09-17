@@ -54,7 +54,8 @@ function create($db) {
         try {
             $query = "INSERT INTO annees_formation SET libelle=:libelle, date_debut=:date_debut, date_fin=:date_fin, actif=:actif";
             $stmt = $db->prepare($query);
-            $stmt->bindParam(":libelle", strip_tags($data->libelle));
+            $libelle = strip_tags($data->libelle);
+            $stmt->bindParam(":libelle", $libelle);
             $stmt->bindValue(":date_debut", isset($data->date_debut) ? strip_tags($data->date_debut) : null);
             $stmt->bindValue(":date_fin", isset($data->date_fin) ? strip_tags($data->date_fin) : null);
             $stmt->bindValue(":actif", isset($data->actif) ? $data->actif : 1);
@@ -78,7 +79,8 @@ function update($db) {
         try {
             $query = "UPDATE annees_formation SET libelle=:libelle, date_debut=:date_debut, date_fin=:date_fin, actif=:actif WHERE id=:id";
             $stmt = $db->prepare($query);
-            $stmt->bindParam(":libelle", strip_tags($data->libelle));
+            $libelle = strip_tags($data->libelle);
+            $stmt->bindParam(":libelle", $libelle);
             $stmt->bindValue(":date_debut", isset($data->date_debut) ? strip_tags($data->date_debut) : null);
             $stmt->bindValue(":date_fin", isset($data->date_fin) ? strip_tags($data->date_fin) : null);
             $stmt->bindValue(":actif", isset($data->actif) ? $data->actif : 1);
