@@ -53,8 +53,10 @@ function readList($db) {
         $params = [];
 
         if (!empty($_GET['search'])) {
-            $query .= " AND (a.nom LIKE :search OR a.prenom LIKE :search OR a.matricule LIKE :search)";
-            $params[':search'] = '%' . $_GET['search'] . '%';
+            $query .= " AND (a.nom LIKE :search1 OR a.prenom LIKE :search2 OR a.matricule LIKE :search3)";
+            $params[':search1'] = '%' . $_GET['search'] . '%';
+            $params[':search2'] = '%' . $_GET['search'] . '%';
+            $params[':search3'] = '%' . $_GET['search'] . '%';
         }
         if (!empty($_GET['filiere_id'])) {
             $query .= " AND a.filiere_id = :filiere_id";
@@ -83,7 +85,7 @@ function readList($db) {
         echo json_encode($apprenants_arr);
     } catch (PDOException $e) {
         http_response_code(500);
-        echo json_encode(["message" => "Erreur lors de la récupération des apprenants."]);
+        echo json_encode(["message" => "Erreur lors de la récupération des apprenants: " . $e->getMessage()]);
     }
 }
 
@@ -161,7 +163,15 @@ function create($db) {
         } catch (PDOException $e) {
             http_response_code(503);
             if ($e->getCode() == 23000) {
-                echo json_encode(["message" => "Ce matricule existe déjà."]);
+                if (strpos($e->getMessage(), 'fk_apprenant_filiere') !== false) {
+                    echo json_encode(["message" => "Filière invalide."]);
+                } else if (strpos($e->getMessage(), 'fk_apprenant_niveau') !== false) {
+                    echo json_encode(["message" => "Niveau invalide."]);
+                } else if (strpos($e->getMessage(), 'fk_apprenant_annee') !== false) {
+                    echo json_encode(["message" => "Année invalide."]);
+                } else {
+                    echo json_encode(["message" => "Ce matricule existe déjà."]);
+                }
             } else {
                 echo json_encode(["message" => "Impossible de créer l'apprenant."]);
             }
@@ -217,7 +227,15 @@ function update($db) {
         } catch (PDOException $e) {
             http_response_code(503);
             if ($e->getCode() == 23000) {
-                echo json_encode(["message" => "Erreur : ce matricule existe déjà."]);
+                if (strpos($e->getMessage(), 'fk_apprenant_filiere') !== false) {
+                    echo json_encode(["message" => "Filière invalide."]);
+                } else if (strpos($e->getMessage(), 'fk_apprenant_niveau') !== false) {
+                    echo json_encode(["message" => "Niveau invalide."]);
+                } else if (strpos($e->getMessage(), 'fk_apprenant_annee') !== false) {
+                    echo json_encode(["message" => "Année invalide."]);
+                } else {
+                    echo json_encode(["message" => "Erreur : ce matricule existe déjà."]);
+                }
             } else {
                 echo json_encode(["message" => "Impossible de mettre à jour l'apprenant."]);
             }
