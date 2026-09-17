@@ -134,26 +134,26 @@ function create($db) {
 
             $stmt = $db->prepare($query);
 
-            $matricule = htmlspecialchars(strip_tags($data->matricule));
-            $nom = htmlspecialchars(strip_tags($data->nom));
-            $prenom = htmlspecialchars(strip_tags($data->prenom));
-            $date_naissance = htmlspecialchars(strip_tags($data->date_naissance));
-            $sexe = htmlspecialchars(strip_tags($data->sexe));
-            $filiere_id = htmlspecialchars(strip_tags($data->filiere_id));
-            $niveau_id = htmlspecialchars(strip_tags($data->niveau_id));
-            $annee_id = htmlspecialchars(strip_tags($data->annee_id));
+            $matricule = strip_tags($data->matricule);
+            $nom = strip_tags($data->nom);
+            $prenom = strip_tags($data->prenom);
+            $date_naissance = strip_tags($data->date_naissance);
+            $sexe = strip_tags($data->sexe);
+            $filiere_id = strip_tags($data->filiere_id);
+            $niveau_id = strip_tags($data->niveau_id);
+            $annee_id = strip_tags($data->annee_id);
 
             $stmt->bindParam(":matricule", $matricule);
             $stmt->bindParam(":nom", $nom);
             $stmt->bindParam(":prenom", $prenom);
             $stmt->bindParam(":date_naissance", $date_naissance);
             $stmt->bindParam(":sexe", $sexe);
-            $stmt->bindValue(":telephone", isset($data->telephone) ? htmlspecialchars(strip_tags($data->telephone)) : null);
-            $stmt->bindValue(":adresse", isset($data->adresse) ? htmlspecialchars(strip_tags($data->adresse)) : null);
+            $stmt->bindValue(":telephone", isset($data->telephone) ? strip_tags($data->telephone) : null);
+            $stmt->bindValue(":adresse", isset($data->adresse) ? strip_tags($data->adresse) : null);
             $stmt->bindParam(":filiere_id", $filiere_id);
             $stmt->bindParam(":niveau_id", $niveau_id);
             $stmt->bindParam(":annee_id", $annee_id);
-            $statut = !empty($data->statut) ? htmlspecialchars(strip_tags($data->statut)) : 'Inscrit';
+            $statut = !empty($data->statut) ? strip_tags($data->statut) : 'Inscrit';
             $stmt->bindParam(":statut", $statut);
 
             if ($stmt->execute()) {
@@ -196,24 +196,24 @@ function update($db) {
 
             $stmt = $db->prepare($query);
 
-            $matricule = htmlspecialchars(strip_tags($data->matricule));
-            $nom = htmlspecialchars(strip_tags($data->nom));
-            $prenom = htmlspecialchars(strip_tags($data->prenom));
-            $date_naissance = htmlspecialchars(strip_tags($data->date_naissance));
-            $sexe = htmlspecialchars(strip_tags($data->sexe));
-            $filiere_id = htmlspecialchars(strip_tags($data->filiere_id));
-            $niveau_id = htmlspecialchars(strip_tags($data->niveau_id));
-            $annee_id = htmlspecialchars(strip_tags($data->annee_id));
-            $statut = htmlspecialchars(strip_tags($data->statut));
-            $id = htmlspecialchars(strip_tags($data->id));
+            $matricule = strip_tags($data->matricule);
+            $nom = strip_tags($data->nom);
+            $prenom = strip_tags($data->prenom);
+            $date_naissance = strip_tags($data->date_naissance);
+            $sexe = strip_tags($data->sexe);
+            $filiere_id = strip_tags($data->filiere_id);
+            $niveau_id = strip_tags($data->niveau_id);
+            $annee_id = strip_tags($data->annee_id);
+            $statut = strip_tags($data->statut);
+            $id = strip_tags($data->id);
 
             $stmt->bindParam(":matricule", $matricule);
             $stmt->bindParam(":nom", $nom);
             $stmt->bindParam(":prenom", $prenom);
             $stmt->bindParam(":date_naissance", $date_naissance);
             $stmt->bindParam(":sexe", $sexe);
-            $stmt->bindValue(":telephone", isset($data->telephone) ? htmlspecialchars(strip_tags($data->telephone)) : null);
-            $stmt->bindValue(":adresse", isset($data->adresse) ? htmlspecialchars(strip_tags($data->adresse)) : null);
+            $stmt->bindValue(":telephone", isset($data->telephone) ? strip_tags($data->telephone) : null);
+            $stmt->bindValue(":adresse", isset($data->adresse) ? strip_tags($data->adresse) : null);
             $stmt->bindParam(":filiere_id", $filiere_id);
             $stmt->bindParam(":niveau_id", $niveau_id);
             $stmt->bindParam(":annee_id", $annee_id);

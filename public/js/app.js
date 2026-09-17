@@ -1,6 +1,6 @@
 $(document).ready(function () {
-    // URL de base de l'API (à adapter si nécessaire)
-    const API_URL = '../api/';
+    // URL de base de l'API. Utilise le proxy api.php si /public est le DocumentRoot.
+    const API_URL = 'api.php?route=';
 
     // Initialisation
     loadReferentiels();
@@ -83,7 +83,7 @@ $(document).ready(function () {
         const niveau = $('#filter-niveau').val();
         const annee = $('#filter-annee').val();
 
-        let url = API_URL + 'apprenants.php?';
+        let url = API_URL + 'apprenants&';
         if (search) url += 'search=' + encodeURIComponent(search) + '&';
         if (filiere) url += 'filiere_id=' + filiere + '&';
         if (niveau) url += 'niveau_id=' + niveau + '&';
@@ -124,7 +124,7 @@ $(document).ready(function () {
         };
 
         $.ajax({
-            url: API_URL + 'apprenants.php',
+            url: API_URL + 'apprenants',
             type: method,
             contentType: 'application/json',
             data: JSON.stringify(formData),
@@ -145,7 +145,7 @@ $(document).ready(function () {
 
     // Récupérer pour édition
     function editApprenant(id) {
-        $.getJSON(API_URL + 'apprenants.php?id=' + id, function(data) {
+        $.getJSON(API_URL + 'apprenants&id=' + id, function(data) {
             $('#form-id').val(data.id);
             $('#form-matricule').val(data.matricule);
             $('#form-nom').val(data.nom);
@@ -170,7 +170,7 @@ $(document).ready(function () {
     function deleteApprenant(id) {
         if (confirm("Êtes-vous sûr de vouloir supprimer cet apprenant ?")) {
             $.ajax({
-                url: API_URL + 'apprenants.php',
+                url: API_URL + 'apprenants',
                 type: 'DELETE',
                 contentType: 'application/json',
                 data: JSON.stringify({ id: id }),
@@ -187,7 +187,7 @@ $(document).ready(function () {
 
     // Afficher détails
     function viewApprenant(id) {
-        $.getJSON(API_URL + 'apprenants.php?id=' + id, function(data) {
+        $.getJSON(API_URL + 'apprenants&id=' + id, function(data) {
             const html = `
                 <div class="details-grid">
                     <p><strong>Matricule</strong> ${escapeHTML(data.matricule)}</p>
@@ -260,9 +260,9 @@ $(document).ready(function () {
     function populateSelect(selector, data, defaultOption, displayField = 'nom') {
         const select = $(selector);
         select.empty();
-        select.append(`<option value="">${defaultOption}</option>`);
+        select.append(`<option value="">${escapeHTML(defaultOption)}</option>`);
         data.forEach(item => {
-            select.append(`<option value="${item.id}">${item[displayField]}</option>`);
+            select.append(`<option value="${escapeHTML(item.id)}">${escapeHTML(item[displayField])}</option>`);
         });
     }
 
@@ -304,4 +304,177 @@ $(document).ready(function () {
     function formatBadgeClass(statut) {
         return statut.toLowerCase().replace(' ', '-').replace('ô', 'o');
     }
+});
+// === GESTION DES VUES ET REFERENTIELS ===
+
+let currentView = 'apprenants';
+let currentRefData = [];
+
+window.switchView = function(view) {
+    currentView = view;
+    $('.view-section').addClass('hidden');
+    if (view === 'apprenants') {
+        $('#view-apprenants').removeClass('hidden');
+        loadApprenants();
+    } else {
+        $('#view-referentiels').removeClass('hidden');
+        let title = view.charAt(0).toUpperCase() + view.slice(1);
+        if (view === 'annees') {
+            title = 'Années de formation';
+            $('#th-nom-libelle').text('Libellé');
+        } else {
+            $('#th-nom-libelle').text('Nom');
+        }
+        $('#ref-title').text(title);
+        loadReferentielsData(view);
+    }
+};
+
+function loadReferentielsData(type) {
+    let endpoint = type;
+    if (type === 'annees') endpoint = 'annees-formation';
+
+    $.getJSON(API_URL + endpoint, function(data) {
+        currentRefData = data;
+        renderRefTable(data, type);
+    }).fail(function() {
+        showMessage('Erreur lors du chargement.', 'error');
+    });
+}
+
+function renderRefTable(data, type) {
+    const tbody = $('#referentiels-table tbody');
+    tbody.empty();
+
+    if (data.length === 0) {
+        tbody.append('<tr><td colspan="5" class="text-center">Aucune donnée.</td></tr>');
+        $('#total-count').text(0);
+        return;
+    }
+
+    data.forEach(item => {
+        let nom = type === 'annees' ? item.libelle : item.nom;
+        let desc = type === 'annees' ? (formatDate(item.date_debut) + ' - ' + formatDate(item.date_fin)) : (item.description || '-');
+        let badgeClass = item.actif == 1 ? 'en-cours' : 'exclu';
+        let badgeText = item.actif == 1 ? 'Actif' : 'Inactif';
+
+        const tr = `
+            <tr>
+                <td>${escapeHTML(item.id)}</td>
+                <td><strong>${escapeHTML(nom)}</strong></td>
+                <td>${escapeHTML(desc)}</td>
+                <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+                <td class="actions-cell">
+                    <button class="btn-primary btn-small btn-edit-ref" data-id="${item.id}">✏️</button>
+                    <button class="btn-danger btn-small btn-delete-ref" data-id="${item.id}">🗑</button>
+                </td>
+            </tr>
+        `;
+        tbody.append(tr);
+    });
+    $('#total-count').text(data.length);
+}
+
+// Events Referentiels
+$('#btn-show-ref-form').on('click', function() {
+    $('#ref-form')[0].reset();
+    $('#ref-form-id').val('');
+    $('#ref-form-type').val(currentView);
+    $('#modal-ref-title').text('Ajouter');
+
+    if (currentView === 'annees') {
+        $('#fg-desc').hide();
+        $('#fg-dates').show().removeClass('hidden');
+        $('#lbl-nom').text('Libellé *');
+        $('#ref-form-nom').attr('name', 'libelle');
+    } else {
+        $('#fg-desc').show();
+        $('#fg-dates').hide();
+        $('#lbl-nom').text('Nom *');
+        $('#ref-form-nom').attr('name', 'nom');
+    }
+    $('#modal-ref-form').removeClass('hidden');
+});
+
+$('#ref-form').on('submit', function(e) {
+    e.preventDefault();
+    let type = $('#ref-form-type').val();
+    let endpoint = type === 'annees' ? 'annees-formation' : type;
+    let id = $('#ref-form-id').val();
+    let method = id ? 'PUT' : 'POST';
+
+    let formData = {
+        actif: $('#ref-form-actif').val()
+    };
+    if (id) formData.id = id;
+
+    if (type === 'annees') {
+        formData.libelle = $('#ref-form-nom').val();
+        formData.date_debut = $('#ref-form-debut').val();
+        formData.date_fin = $('#ref-form-fin').val();
+    } else {
+        formData.nom = $('#ref-form-nom').val();
+        formData.description = $('#ref-form-desc').val();
+    }
+
+    $.ajax({
+        url: API_URL + endpoint,
+        type: method,
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(res) {
+            $('#modal-ref-form').addClass('hidden');
+            showMessage(res.message, 'success');
+            loadReferentielsData(type);
+            loadReferentiels(); // Met à jour les listes déroulantes
+        },
+        error: function(xhr) {
+            showMessage(xhr.responseJSON?.message || 'Erreur d\'enregistrement', 'error');
+        }
+    });
+});
+
+$('#btn-cancel-ref-form, .close-modal').on('click', function() {
+    $('#modal-ref-form').addClass('hidden');
+});
+
+$('#referentiels-table tbody').on('click', '.btn-edit-ref', function() {
+    let id = $(this).data('id');
+    let item = currentRefData.find(x => x.id == id);
+    if (!item) return;
+
+    $('#btn-show-ref-form').click();
+    $('#modal-ref-title').text('Modifier');
+    $('#ref-form-id').val(item.id);
+    $('#ref-form-actif').val(item.actif);
+
+    if (currentView === 'annees') {
+        $('#ref-form-nom').val(item.libelle);
+        $('#ref-form-debut').val(item.date_debut);
+        $('#ref-form-fin').val(item.date_fin);
+    } else {
+        $('#ref-form-nom').val(item.nom);
+        $('#ref-form-desc').val(item.description);
+    }
+});
+
+$('#referentiels-table tbody').on('click', '.btn-delete-ref', function() {
+    if (!confirm('Voulez-vous vraiment supprimer cet élément ?')) return;
+    let id = $(this).data('id');
+    let endpoint = currentView === 'annees' ? 'annees-formation' : currentView;
+
+    $.ajax({
+        url: API_URL + endpoint,
+        type: 'DELETE',
+        contentType: 'application/json',
+        data: JSON.stringify({ id: id }),
+        success: function(res) {
+            showMessage(res.message, 'success');
+            loadReferentielsData(currentView);
+            loadReferentiels(); // Met à jour les listes déroulantes
+        },
+        error: function(xhr) {
+            showMessage(xhr.responseJSON?.message || 'Erreur lors de la suppression.', 'error');
+        }
+    });
 });

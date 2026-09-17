@@ -1,0 +1,14 @@
+# RAPPORT DE CORRECTIONS SUITE À L'AUDIT
+
+Ce rapport documente les corrections apportées suite à l'audit final pour valider le périmètre de la V1 et résoudre les problèmes de sécurité.
+
+| Problème initial | Correction effectuée | Fichiers modifiés | Tests réalisés | Résultat | Problèmes restants |
+|---|---|---|---|---|---|
+| **Faille XSS (Frontend)** | Ajout de la fonction `escapeHTML()` autour des variables insérées dans les chaînes de template DOM pour la génération des `<option>`. | `public/js/app.js` | Test avec données `<script>` et caractères spéciaux dans la base de données. | Succès. Affichage sécurisé dans les listes déroulantes et le tableau. | Aucun |
+| **Double échappement HTML** | Remplacement de `htmlspecialchars(strip_tags(...))` par `trim(...)` ou `strip_tags()` uniquement dans l'API avant enregistrement en base. Les données brutes (ex: `A & B`) sont stockées telles quelles. | `api/apprenants.php` | Test d'insertion des valeurs `A & B`, `Jean <test>`, `O'Neil`, `"Test"`. Vérification BDD + API + Rendu Front. | Succès. Les données s'affichent correctement sans balises HTML inattendues. | Aucun |
+| **CRUD des référentiels incomplet** | Création des méthodes `POST`, `PUT` et `DELETE` avec support de la désactivation (champ `actif=0`) en cas de contrainte de clé étrangère (23000). | `api/filieres.php`, `api/niveaux.php`, `api/annees-formation.php` | Test unitaire de création, modification, et tentative de suppression d'une filière liée à un apprenant existant. | Succès. L'API renvoie les bons codes HTTP et gère la désactivation. | Aucun |
+| **Interface référentiels (UI) manquante** | Création d'un système d'onglets (Vues) dans le HTML et le JS. Ajout d'une modale générique pour gérer dynamiquement l'ajout/modification de Filières, Niveaux et Années de formation. | `public/index.php`, `public/js/app.js` | Manipulation manuelle (clics, soumissions) des formulaires pour les 3 entités de référence. | Succès. Les listes se mettent à jour, la navigation est fluide. | Aucun |
+| **Architecture / Routage (public/api)** | Création d'un proxy `api.php` à la racine de `/public` agissant comme un point d'entrée unique (`api.php?route=xxx`). Changement de `API_URL` dans le JS. | `public/api.php`, `public/js/app.js` | Tests de lancement du serveur de développement ciblant le dossier `/public` comme DocumentRoot. | Succès. Toutes les requêtes AJAX sont résolues correctement. | Aucun |
+
+---
+*Note : Le fichier `api/health.php` et la fonctionnalité de "Pagination" n'ont pas été implémentés lors de ce cycle, conformément aux instructions strictes de priorité et de ciblage du correctif (Améliorations futures non prioritaires par rapport à la V1 et la sécurité).*
