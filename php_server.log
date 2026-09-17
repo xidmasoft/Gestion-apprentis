@@ -1,0 +1,22 @@
+[Thu Sep 17 11:39:53 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Thu Sep 17 11:40:25 2026] [::1]:35108 Accepted
+[Thu Sep 17 11:40:25 2026] [::1]:35108 [200]: GET /public/index.php
+[Thu Sep 17 11:40:25 2026] [::1]:35108 Closing
+[Thu Sep 17 11:40:25 2026] [::1]:35118 Accepted
+[Thu Sep 17 11:40:25 2026] [::1]:35128 Accepted
+[Thu Sep 17 11:40:25 2026] [::1]:35118 [200]: GET /public/css/style.css
+[Thu Sep 17 11:40:25 2026] [::1]:35128 [200]: GET /public/js/app.js
+[Thu Sep 17 11:40:25 2026] [::1]:35118 Closing
+[Thu Sep 17 11:40:25 2026] [::1]:35128 Closing
+[Thu Sep 17 11:40:25 2026] [::1]:35130 Accepted
+[Thu Sep 17 11:40:25 2026] [::1]:35140 Accepted
+[Thu Sep 17 11:40:25 2026] [::1]:35150 Accepted
+[Thu Sep 17 11:40:25 2026] [::1]:35130 [200]: GET /api/filieres.php
+[Thu Sep 17 11:40:25 2026] [::1]:35130 Closing
+[Thu Sep 17 11:40:25 2026] [::1]:35164 Accepted
+[Thu Sep 17 11:40:25 2026] [::1]:35140 [200]: GET /api/niveaux.php
+[Thu Sep 17 11:40:25 2026] [::1]:35140 Closing
+[Thu Sep 17 11:40:26 2026] [::1]:35150 [200]: GET /api/annees-formation.php
+[Thu Sep 17 11:40:26 2026] [::1]:35150 Closing
+[Thu Sep 17 11:40:26 2026] [::1]:35164 [200]: GET /api/apprenants.php?
+[Thu Sep 17 11:40:26 2026] [::1]:35164 Closing
